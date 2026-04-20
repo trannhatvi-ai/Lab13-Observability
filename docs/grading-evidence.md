@@ -4,9 +4,9 @@
 - [x] JSON logs showing correlation_id
 - [x] Log line with PII redaction
 - [x] Langfuse trace list with >= 10 traces (`extras/langfuse_trace.png`)
-- [ ] One full trace waterfall
-- [ ] Dashboard with 6 panels
-- [ ] Alert rules with runbook link screenshot
+- [x] One full trace waterfall (`extras/waterfall.png`)
+- [x] Dashboard with 6 panels (`extras/dashboard.png`)
+- [x] Alert rules with runbook link screenshot (`extras/alert_rules.png`)
 
 Verified from local run:
 - validate_logs.py: 100/100
@@ -15,9 +15,7 @@ Verified from local run:
 - Potential PII leaks: 0
 
 ## Remaining items to submit
-1. Capture one full trace waterfall screenshot.
-2. Capture dashboard screenshot with all 6 required panels.
-3. Capture alert rule screenshot showing runbook links.
+1. Fill group metadata and member evidence links in `docs/blueprint-template.md`.
 
 ## Required screenshots
 - Langfuse trace list with >= 10 traces

@@ -8,20 +8,18 @@
 - [x] PII redaction appears in JSON logs
 - [x] Langfuse tracing is enabled in the app
 - [x] Langfuse trace list screenshot with >= 10 traces
-- [ ] One full trace waterfall screenshot
-- [ ] Dashboard screenshot with 6 panels
-- [ ] Alert rules screenshot with runbook link
+- [x] One full trace waterfall screenshot
+- [x] Dashboard screenshot with 6 panels
+- [x] Alert rules screenshot with runbook link
 
 ## 1. Team Metadata
-- [GROUP_NAME]: [TODO_FILL]
-- [REPO_URL]: [TODO_FILL]
+- [GROUP_NAME]: 04
+- [REPO_URL]: https://github.com/trannhatvi-ai/Lab13-Observability.git
 - [MEMBERS]:
-  - Member A: [Name] | Role: Logging & PII
-  - Member B: [Name] | Role: Tracing & Enrichment
-  - Member C: [Name] | Role: SLO & Alerts
-  - Member D: [Name] | Role: Load Test & Dashboard
-  - Member E: [Name] | Role: Demo & Report
-
+  - Member A: 2A202600312 Trần Thanh Phong | Role: Logging & PII
+  - Member B: 2A202600064 Hoàng Đinh Duy Anh | Role: Tracing & Enrichment
+  - Member C: 2A202600497 Trần Nhật Vĩ | Role: SLO & Alerts
+  - Member D: 2A202600486 Nguyễn Tiến Huy Hoàng | Role: Load Test & Dashboard
 ---
 
 ## 2. Group Performance (Auto-Verified)
@@ -34,28 +32,35 @@
 ## 3. Technical Evidence (Group)
 
 ### 3.1 Logging & Tracing
-- [EVIDENCE_CORRELATION_ID_SCREENSHOT]: [Path to image]
-- [EVIDENCE_PII_REDACTION_SCREENSHOT]: [Path to image]
-- [EVIDENCE_TRACE_WATERFALL_SCREENSHOT]: [TODO_FILL_AFTER_WATERFALL_CAPTURE]
+- [EVIDENCE_CORRELATION_ID_SCREENSHOT]: data/logs.jsonl (request/response correlation example around lines 383-384)
+- [EVIDENCE_PII_REDACTION_SCREENSHOT]: data/logs.jsonl (REDACTED example around line 381)
+- [EVIDENCE_TRACE_WATERFALL_SCREENSHOT]: extras/waterfall.png
 - [TRACE_WATERFALL_EXPLANATION]: Example explanation: the `run` span shows stable agent latency (~150ms baseline), while incident `rag_slow` reproduces a much longer retrieval stage.
 
 ### 3.2 Dashboard & SLOs
-- [DASHBOARD_6_PANELS_SCREENSHOT]: [Path to image]
+- [DASHBOARD_6_PANELS_SCREENSHOT]: extras/dashboard.png
 - [SLO_TABLE]:
 | SLI | Target | Window | Current Value |
 |---|---:|---|---:|
 | Latency P95 | < 3000ms | 28d | 150ms (local run) |
 | Error Rate | < 2% | 28d | 0% (local run) |
-| Cost Budget | < $2.5/day | 1d | [TODO_FILL_FROM_DASHBOARD] |
+| Cost Budget | < $2.5/day | 1d | ~$0.0394 per test run snapshot (well below target) |
 
 ### 3.3 Alerts & Runbook
-- [ALERT_RULES_SCREENSHOT]: [Path to image]
+- [ALERT_RULES_SCREENSHOT]: extras/alert_rules.png
 - [SAMPLE_RUNBOOK_LINK]: [docs/alerts.md](docs/alerts.md)
+
+Alert validation summary (local drill):
+- `rag_slow`: request latency moved from ~0.31s baseline to ~2.6-5.3s.
+- `tool_fail`: recent `request_failed` events observed, sample `error_type=RuntimeError`.
+- `cost_spike`: cost and output tokens increased faster than baseline.
+  - Baseline: `cost/req=0.00235`, `tokens_out/req=150.5`
+  - Cost spike: `cost/req=0.00755`, `tokens_out/req=496.4`
 
 ---
 
 ## 4. Incident Response (Group)
-- [SCENARIO_NAME]: (e.g., rag_slow)
+- [SCENARIO_NAME]: rag_slow
 - [SYMPTOMS_OBSERVED]: p95/p99 latency increased significantly during `rag_slow`; baseline requests remained healthy before injection.
 - [ROOT_CAUSE_PROVED_BY]: Trace waterfall (slow retrieval span) + correlated logs with same `correlation_id` (example pair lines 383-384 in `data/logs.jsonl`).
 - [FIX_ACTION]: Disabled incident toggle and reverted to normal retrieval path.
@@ -65,25 +70,21 @@
 
 ## 5. Individual Contributions & Evidence
 
-### [MEMBER_A_NAME]
+### 2A202600312 Tran Thanh Phong
 - [TASKS_COMPLETED]: Implemented structured logging context and PII redaction validation.
-- [EVIDENCE_LINK]: (Link to specific commit or PR)
+- [EVIDENCE_LINK]: https://github.com/trannhatvi-ai/Lab13-Observability.git
 
-### [MEMBER_B_NAME]
+### 2A202600064 Hoang Dinh Duy Anh
 - [TASKS_COMPLETED]: Enabled Langfuse tracing and trace metadata enrichment.
-- [EVIDENCE_LINK]: 
+- [EVIDENCE_LINK]: https://github.com/trannhatvi-ai/Lab13-Observability.git
 
-### [MEMBER_C_NAME]
+### 2A202600497 Tran Nhat Vi
 - [TASKS_COMPLETED]: Defined SLO/alert thresholds and runbook mapping.
-- [EVIDENCE_LINK]: 
+- [EVIDENCE_LINK]: https://github.com/trannhatvi-ai/Lab13-Observability.git
 
-### [MEMBER_D_NAME]
+### 2A202600486 Nguyen Tien Huy Hoang
 - [TASKS_COMPLETED]: Executed load tests and incident drills for evidence collection.
-- [EVIDENCE_LINK]: 
-
-### [MEMBER_E_NAME]
-- [TASKS_COMPLETED]: Compiled dashboard/report artifacts and demo narrative.
-- [EVIDENCE_LINK]: 
+- [EVIDENCE_LINK]: https://github.com/trannhatvi-ai/Lab13-Observability.git
 
 ---
 
