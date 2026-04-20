@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Day 13 Observability Dashboard</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #131d34;
+      --panel-2: #1a2746;
+      --text: #e8eefc;
+      --muted: #9fb1d9;
+      --ok: #35c978;
+      --warn: #f4b844;
+      --danger: #ef6161;
+      --line-a: #64b5ff;
+      --line-b: #9d7dff;
+      --line-c: #42d7c8;
+      --line-d: #ffa657;
+      --grid: #2a3a61;
+      --slo: #f4b844;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background:
+        radial-gradient(circle at 15% 0%, #1e2f58 0%, transparent 35%),
+        radial-gradient(circle at 100% 100%, #1b3f5a 0%, transparent 30%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .top {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    input, select, button {
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid #2e416e;
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .status {
+      margin-bottom: 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, var(--panel), #0f172b);
+      border: 1px solid #2b3d67;
+      border-radius: 12px;
+      padding: 12px;
+      min-height: 220px;
+    }
+
+    .span-6 { grid-column: span 6; }
+
+    .card h3 {
+      margin: 0 0 6px;
+      font-size: 15px;
+      font-weight: 650;
+    }
+
+    .sub {
+      margin: 0 0 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .kpis {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 0 0 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .kpis span {
+      background: #111b32;
+      border: 1px solid #2b3d67;
+      border-radius: 999px;
+      padding: 4px 8px;
+    }
+
+    svg {
+      width: 100%;
+      height: 140px;
+      display: block;
+      border-radius: 8px;
+      background: #0d162c;
+      border: 1px solid #24355b;
+    }
+
+    .legend {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      display: inline-block;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+
+    .errors {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      max-height: 52px;
+      overflow: auto;
+    }
+
+    @media (max-width: 900px) {
+      .span-6 { grid-column: span 12; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="title">Day 13 Observability Dashboard</div>
+      <div class="controls">
+        <label>Metrics URL</label>
+        <input id="metricsUrl" size="34" value="http://127.0.0.1:1009/metrics" />
+        <label>Range</label>
+        <select id="rangeMinutes">
+          <option value="60" selected>1h</option>
+          <option value="30">30m</option>
+          <option value="15">15m</option>
+        </select>
+        <label>Refresh</label>
+        <select id="refreshSec">
+          <option value="15" selected>15s</option>
+          <option value="20">20s</option>
+          <option value="30">30s</option>
+        </select>
+        <button id="refreshNow">Refresh now</button>
+      </div>
+    </div>
+
+    <div class="status" id="status">Waiting for first datapoint...</div>
+
+    <div class="grid">
+      <div class="card span-6">
+        <h3>1) Latency P50 / P95 / P99</h3>
+        <p class="sub">Unit: ms. SLO line: 3000 ms</p>
+        <div class="kpis" id="latencyKpis"></div>
+        <svg id="latencyChart"></svg>
+        <div class="legend">
+          <span><i class="dot" style="background:var(--line-a)"></i>P50</span>
+          <span><i class="dot" style="background:var(--line-b)"></i>P95</span>
+          <span><i class="dot" style="background:var(--line-c)"></i>P99</span>
+          <span><i class="dot" style="background:var(--slo)"></i>SLO</span>
+        </div>
+      </div>
+
+      <div class="card span-6">
+        <h3>2) Traffic (QPS / request count)</h3>
+        <p class="sub">Unit: req/s and cumulative requests</p>
+        <div class="kpis" id="trafficKpis"></div>
+        <svg id="trafficChart"></svg>
+      </div>
+
+      <div class="card span-6">
+        <h3>3) Error rate + breakdown</h3>
+        <p class="sub">Unit: %. SLO line: 2%</p>
+        <div class="kpis" id="errorKpis"></div>
+        <svg id="errorChart"></svg>
+        <div class="errors" id="errorBreakdown"></div>
+      </div>
+
+      <div class="card span-6">
+        <h3>4) Cost over time</h3>
+        <p class="sub">Unit: USD</p>
+        <div class="kpis" id="costKpis"></div>
+        <svg id="costChart"></svg>
+      </div>
+
+      <div class="card span-6">
+        <h3>5) Tokens in / out</h3>
+        <p class="sub">Unit: tokens</p>
+        <div class="kpis" id="tokenKpis"></div>
+        <svg id="tokenChart"></svg>
+      </div>
+
+      <div class="card span-6">
+        <h3>6) Quality proxy</h3>
+        <p class="sub">Unit: score [0..1]. SLO line: 0.75</p>
+        <div class="kpis" id="qualityKpis"></div>
+        <svg id="qualityChart"></svg>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      points: [],
+      maxPoints: 240,
+      timer: null,
+      lastTs: null,
+      lastTraffic: 0,
+      lastCost: 0,
+      lastIn: 0,
+      lastOut: 0,
+    };
+
+    function formatNum(value, digits = 2) {
+      if (value === null || value === undefined || Number.isNaN(value)) return "-";
+      return Number(value).toFixed(digits);
+    }
+
+    function setStatus(msg, ok = true) {
+      const el = document.getElementById("status");
+      el.textContent = msg;
+      el.style.color = ok ? "var(--muted)" : "var(--danger)";
+    }
+
+    function polylinePoints(values, yMin, yMax, width, height) {
+      const n = values.length;
+      if (!n) return "";
+      const stepX = n > 1 ? width / (n - 1) : width;
+      return values.map((v, i) => {
+        const x = i * stepX;
+        const norm = yMax === yMin ? 0 : (v - yMin) / (yMax - yMin);
+        const y = height - norm * height;
+        return `${x},${Math.max(0, Math.min(height, y))}`;
+      }).join(" ");
+    }
+
+    function renderChart(svgId, series, options = {}) {
+      const svg = document.getElementById(svgId);
+      const width = svg.clientWidth || 600;
+      const height = svg.clientHeight || 140;
+      const allVals = series.flatMap(s => s.values);
+      const yMin = options.yMin !== undefined ? options.yMin : Math.min(...allVals, 0);
+      const yMax = options.yMax !== undefined ? options.yMax : Math.max(...allVals, 1);
+
+      const gridLines = [];
+      for (let i = 1; i <= 4; i++) {
+        const y = (height / 5) * i;
+        gridLines.push(`<line x1="0" y1="${y}" x2="${width}" y2="${y}" stroke="var(--grid)" stroke-width="1"/>`);
+      }
+
+      const lines = series.map(s => {
+        const pts = polylinePoints(s.values, yMin, yMax, width, height);
+        return `<polyline fill="none" stroke="${s.color}" stroke-width="2" points="${pts}"/>`;
+      }).join("");
+
+      let sloLine = "";
+      if (options.slo !== undefined) {
+        const norm = yMax === yMin ? 0 : (options.slo - yMin) / (yMax - yMin);
+        const y = height - norm * height;
+        sloLine = `<line x1="0" y1="${y}" x2="${width}" y2="${y}" stroke="var(--slo)" stroke-width="2" stroke-dasharray="6 4"/>`;
+      }
+
+      svg.innerHTML = `
+        <rect x="0" y="0" width="${width}" height="${height}" fill="#0d162c"/>
+        ${gridLines.join("")}
+        ${sloLine}
+        ${lines}
+      `;
+    }
+
+    function pushPoint(metrics) {
+      const now = Date.now();
+      const dt = state.lastTs ? Math.max((now - state.lastTs) / 1000, 1) : 1;
+      const traffic = metrics.traffic || 0;
+      const totalCost = metrics.total_cost_usd || 0;
+      const inTotal = metrics.tokens_in_total || 0;
+      const outTotal = metrics.tokens_out_total || 0;
+      const errors = Object.values(metrics.error_breakdown || {}).reduce((a, b) => a + b, 0);
+      const errorRate = traffic > 0 ? (errors / traffic) * 100 : 0;
+
+      const point = {
+        t: now,
+        latency_p50: metrics.latency_p50 || 0,
+        latency_p95: metrics.latency_p95 || 0,
+        latency_p99: metrics.latency_p99 || 0,
+        traffic,
+        qps: state.lastTs ? Math.max((traffic - state.lastTraffic) / dt, 0) : 0,
+        error_rate: errorRate,
+        error_breakdown: metrics.error_breakdown || {},
+        total_cost_usd: totalCost,
+        cost_delta: state.lastTs ? Math.max(totalCost - state.lastCost, 0) : 0,
+        tokens_in_total: inTotal,
+        tokens_out_total: outTotal,
+        tokens_in_delta: state.lastTs ? Math.max(inTotal - state.lastIn, 0) : 0,
+        tokens_out_delta: state.lastTs ? Math.max(outTotal - state.lastOut, 0) : 0,
+        quality_avg: metrics.quality_avg || 0,
+      };
+
+      state.points.push(point);
+      if (state.points.length > state.maxPoints) state.points.shift();
+
+      state.lastTs = now;
+      state.lastTraffic = traffic;
+      state.lastCost = totalCost;
+      state.lastIn = inTotal;
+      state.lastOut = outTotal;
+    }
+
+    function pointsInRange() {
+      const minutes = Number(document.getElementById("rangeMinutes").value || 60);
+      const cutoff = Date.now() - (minutes * 60 * 1000);
+      return state.points.filter(p => p.t >= cutoff);
+    }
+
+    function render() {
+      const pts = pointsInRange();
+      if (!pts.length) return;
+
+      const last = pts[pts.length - 1];
+
+      document.getElementById("latencyKpis").innerHTML = `
+        <span>P50: ${formatNum(last.latency_p50, 0)} ms</span>
+        <span>P95: ${formatNum(last.latency_p95, 0)} ms</span>
+        <span>P99: ${formatNum(last.latency_p99, 0)} ms</span>`;
+
+      renderChart("latencyChart", [
+        { values: pts.map(p => p.latency_p50), color: "var(--line-a)" },
+        { values: pts.map(p => p.latency_p95), color: "var(--line-b)" },
+        { values: pts.map(p => p.latency_p99), color: "var(--line-c)" }
+      ], { yMin: 0, slo: 3000 });
+
+      document.getElementById("trafficKpis").innerHTML = `
+        <span>Total requests: ${last.traffic}</span>
+        <span>Current QPS: ${formatNum(last.qps, 2)}</span>`;
+      renderChart("trafficChart", [
+        { values: pts.map(p => p.qps), color: "var(--line-a)" },
+        { values: pts.map(p => p.traffic), color: "var(--line-d)" }
+      ], { yMin: 0 });
+
+      document.getElementById("errorKpis").innerHTML = `
+        <span>Error rate: ${formatNum(last.error_rate, 2)} %</span>
+        <span>Total errors: ${Object.values(last.error_breakdown).reduce((a,b)=>a+b,0)}</span>`;
+      renderChart("errorChart", [
+        { values: pts.map(p => p.error_rate), color: "var(--danger)" }
+      ], { yMin: 0, slo: 2 });
+      const errEntries = Object.entries(last.error_breakdown);
+      document.getElementById("errorBreakdown").innerHTML = errEntries.length
+        ? errEntries.map(([k, v]) => `<div>${k}: ${v}</div>`).join("")
+        : "No errors in current snapshot.";
+
+      document.getElementById("costKpis").innerHTML = `
+        <span>Total cost: $${formatNum(last.total_cost_usd, 4)}</span>
+        <span>Cost delta: $${formatNum(last.cost_delta, 4)}</span>`;
+      renderChart("costChart", [
+        { values: pts.map(p => p.total_cost_usd), color: "var(--line-b)" },
+        { values: pts.map(p => p.cost_delta), color: "var(--line-d)" }
+      ], { yMin: 0 });
+
+      document.getElementById("tokenKpis").innerHTML = `
+        <span>In total: ${last.tokens_in_total}</span>
+        <span>Out total: ${last.tokens_out_total}</span>`;
+      renderChart("tokenChart", [
+        { values: pts.map(p => p.tokens_in_delta), color: "var(--line-a)" },
+        { values: pts.map(p => p.tokens_out_delta), color: "var(--line-c)" }
+      ], { yMin: 0 });
+
+      document.getElementById("qualityKpis").innerHTML = `
+        <span>Quality avg: ${formatNum(last.quality_avg, 3)}</span>`;
+      renderChart("qualityChart", [
+        { values: pts.map(p => p.quality_avg), color: "var(--ok)" }
+      ], { yMin: 0, yMax: 1, slo: 0.75 });
+    }
+
+    async function fetchMetrics() {
+      const url = document.getElementById("metricsUrl").value.trim();
+      try {
+        const response = await fetch(url, { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        pushPoint(data);
+        render();
+        setStatus(`Last update: ${new Date().toLocaleTimeString()} | Source: ${url}`);
+      } catch (err) {
+        setStatus(`Fetch failed: ${String(err)}`, false);
+      }
+    }
+
+    function restartTimer() {
+      if (state.timer) clearInterval(state.timer);
+      const sec = Number(document.getElementById("refreshSec").value || 15);
+      state.timer = setInterval(fetchMetrics, sec * 1000);
+    }
+
+    document.getElementById("refreshNow").addEventListener("click", fetchMetrics);
+    document.getElementById("refreshSec").addEventListener("change", restartTimer);
+    document.getElementById("rangeMinutes").addEventListener("change", render);
+
+    fetchMetrics();
+    restartTimer();
+  </script>
+</body>
+</html>
