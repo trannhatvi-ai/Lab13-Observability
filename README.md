@@ -21,7 +21,7 @@ This template is intentionally incomplete. Teams are expected to finish TODOs du
 3. **Enrich Logs**: Update `app/main.py` to bind user, session, and feature context to every log.
 4. **Sanitize Data**: Implement the PII scrubber in `app/logging_config.py`.
 5. **Verify with Script**: Run `python scripts/validate_logs.py` to check your progress.
-6. **Tracing**: Send 10-20 requests and verify traces in Langfuse (ensure `observe` decorator is used).
+6. **Tracing**: Send 10-20 requests and verify traces in Langfuse after setting your API keys and starting the app.
 7. **Dashboards**: Build your 6-panel dashboard from exported metrics.
 8. **Alerting**: Configure alert rules in `config/alert_rules.yaml` and test them.
 
