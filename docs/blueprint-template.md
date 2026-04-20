@@ -72,19 +72,19 @@ Alert validation summary (local drill):
 
 ### 2A202600312 Tran Thanh Phong
 - [TASKS_COMPLETED]: Implemented structured logging context and PII redaction validation.
-- [EVIDENCE_LINK]: https://github.com/trannhatvi-ai/Lab13-Observability.git
+- [EVIDENCE_LINK]: https://github.com/trannhatvi-ai/Lab13-Observability/commit/82d1d91855df9401d48e1e4d1a4bf62fcb1144b2
 
 ### 2A202600064 Hoang Dinh Duy Anh
 - [TASKS_COMPLETED]: Enabled Langfuse tracing and trace metadata enrichment.
-- [EVIDENCE_LINK]: https://github.com/trannhatvi-ai/Lab13-Observability.git
+- [EVIDENCE_LINK]: https://github.com/trannhatvi-ai/Lab13-Observability/commit/8284a58eab8284f9f4229981e8bdbf404d0edec0
 
 ### 2A202600497 Tran Nhat Vi
 - [TASKS_COMPLETED]: Defined SLO/alert thresholds and runbook mapping.
-- [EVIDENCE_LINK]: https://github.com/trannhatvi-ai/Lab13-Observability.git
+- [EVIDENCE_LINK]: https://github.com/trannhatvi-ai/Lab13-Observability/commit/bdec42098e1480257dda598c80cdd53d3dca735e
 
 ### 2A202600486 Nguyen Tien Huy Hoang
 - [TASKS_COMPLETED]: Executed load tests and incident drills for evidence collection.
-- [EVIDENCE_LINK]: https://github.com/trannhatvi-ai/Lab13-Observability.git
+- [EVIDENCE_LINK]: https://github.com/trannhatvi-ai/Lab13-Observability/commit/c3592b3902140b26a0dbf24b04da8e9359e9a71d
 
 ---
 
